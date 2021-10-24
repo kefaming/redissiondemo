@@ -1,0 +1,17 @@
+server:
+  port: 19222 #设置端口
+  servlet:
+    context-path: / #设置应用的目录.  前缀需要带/, 无需设置后缀, 示例 【 /xxx 】 or 【 / 】
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3307/admin
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.jdbc.Driver
+
+logging:
+  level:
+    root: info   #主日志级别
+    com.example.demo: debug   #该项目日志级别，当需要打印sql时请开启为debug
+  file:
+    path: ./logs

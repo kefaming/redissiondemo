@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.SerialMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.demo.model.Serial">
+        <id column="serial_id" jdbcType="LONGVARCHAR" property="serialId"/>
+        <result column="min_val" jdbcType="BIGINT" property="minVal"/>
+        <result column="max_val" jdbcType="BIGINT" property="maxVal"/>
+        <result column="last_val" jdbcType="BIGINT" property="lastVal"/>
+        <result column="physical_date" jdbcType="INTEGER" property="physicalDate"/>
+        <result column="remark" jdbcType="LONGVARCHAR" property="remark"/>
+    </resultMap>
+
+    <select id="getSerialNo" resultType="java.util.Map">
+        CALL p_serial(#{snoId});
+    </select>
+
+    <select id="getSerialInfo" resultMap="BaseResultMap">
+        SELECT serial_id,
+               min_val,
+               max_val,
+               last_val,
+               physical_date,
+               remark
+        FROM t_serial
+        WHERE serial_id = #{snoId};
+    </select>
+
+    <update id="updLastValue">
+        UPDATE t_serial
+        SET
+        <if test="physicalDate != null and physicalDate != ''">
+            physical_date = #{physicalDate},
+        </if>
+        last_val = #{lastVal}
+        WHERE serial_id = #{serialId};
+    </update>
+
+</mapper>

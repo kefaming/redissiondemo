@@ -1,7 +1,9 @@
 package com.example.demo;
 
 import com.example.demo.exception.BizException;
+import com.example.demo.model.Serial;
 import com.example.demo.model.User;
+import com.example.demo.service.SerialService;
 import com.example.demo.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -24,11 +26,46 @@ class DemoApplicationTests {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private SerialService serialService;
+
+    // 分布式ID
     @Test
-    void contextLoads() {
+    void distributedId() {
 
         int orderId = new Random().nextInt(1000);
-        System.out.println(orderId);
+        log.debug(String.valueOf(orderId));
+
+        String key = "dec_store_lock_" + orderId;
+        RLock lock = redissonClient.getLock(key);
+        try {
+            //加锁 操作很类似Java的ReentrantLock机制
+            lock.lock(); // 也可用下面的写法
+            // boolean res = lock.tryLock(3, 10, TimeUnit.SECONDS); //尝试加锁，最多等待3秒，上锁以后10秒自动解锁
+            // if(res){
+            //     // do your business
+            // }
+
+            Serial serial = serialService.getSerialInfo("SEQ_USER_ID");
+
+            Long userId = serialService.getNextValue("SEQ_USER_ID");
+            System.out.println("=============== 分布式ID: " + userId + " ===============");
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            e.printStackTrace();
+        } finally {
+            //解锁
+            lock.unlock();
+        }
+    }
+
+    // 分布式锁
+//    @Test
+    void distributedLock() {
+
+        int orderId = new Random().nextInt(1000);
+        log.debug(String.valueOf(orderId));
 
         String key = "dec_store_lock_" + orderId;
         RLock lock = redissonClient.getLock(key);
@@ -41,7 +78,7 @@ class DemoApplicationTests {
             // }
 
             // 查询库存
-            List<User> list = userService.getUserInfo("test_mybatis_1625", "pwd_mybatis_625");
+            List<User> list = userService.getUserInfo("test_mybatis_625", "pwd_mybatis_625");
             if(list != null && list.size() > 0){
                 for (User user:list) {
                     System.out.println(user);

@@ -1,17 +1,19 @@
 package com.example.demo;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.demo.exception.BizException;
-import com.example.demo.model.Serial;
-import com.example.demo.model.User;
+import com.example.demo.mapper.StorageMapper;
+import com.example.demo.model.Storage;
 import com.example.demo.service.SerialService;
-import com.example.demo.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -24,13 +26,26 @@ class DemoApplicationTests {
     private RedissonClient redissonClient;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private SerialService serialService;
 
-    // 分布式ID
+    @Resource
+    private StorageMapper storageMapper;
+
+    // 测试mybatis plus
     @Test
+    public void testSelect() {
+        System.out.println(("----- selectAll method test ------"));
+        List<Storage> storageList = storageMapper.selectList(null);
+        Assertions.assertEquals(1, storageList.size());
+        storageList.forEach(System.out::println);
+
+        Storage s = storageMapper.selectById("1");
+        System.out.println(s);
+    }
+
+
+    // 分布式ID
+//    @Test
     void distributedId() {
 
         int orderId = new Random().nextInt(1000);
@@ -45,8 +60,6 @@ class DemoApplicationTests {
             // if(res){
             //     // do your business
             // }
-
-            Serial serial = serialService.getSerialInfo("SEQ_USER_ID");
 
             Long userId = serialService.getNextValue("SEQ_USER_ID");
             System.out.println("=============== 分布式ID: " + userId + " ===============");
@@ -77,29 +90,23 @@ class DemoApplicationTests {
             //     // do your business
             // }
 
-            // 查询库存
-            List<User> list = userService.getUserInfo("test_mybatis_625", "pwd_mybatis_625");
-            if(list != null && list.size() > 0){
-                for (User user:list) {
-                    System.out.println(user);
-                }
-            }
+            String commodityCode = "C201901140001"; // 商品ID
+            int count = 10; // 购买数量
 
-            // 如果库存为空或库存不足
-            if (list.size() <= 0) {
-               throw new BizException(1001, "库存不足");
+            // 查询库存
+            QueryWrapper<Storage> qryWrapper = new QueryWrapper<>();
+            qryWrapper.eq("commodity_code", commodityCode);
+            Storage storage = storageMapper.selectOne(qryWrapper);
+
+            // 如果库存不足
+            if (storage.getCount() < count) {
+                throw new BizException(1001, "库存不足");
             }
 
             // 扣减库存
-            int i = orderId;
-            User user = new User();
-            user.setUserId(i);
-            user.setUserName("test_mybatis_" + i);
-            user.setPwd("pwd_mybatis_" + i);
-            System.out.println(user);
-            userService.insertUser(user);
+            storageMapper.decreaseStorage(commodityCode, count);
 
-            log.debug("=============== 执行业务操作完成 ===============");
+            log.debug("=============== 扣减库存成功 ===============");
         } catch (Exception e) {
             log.error(e.getMessage());
         } finally {

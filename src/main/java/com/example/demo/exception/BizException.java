@@ -5,7 +5,7 @@ import lombok.Getter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
-/*
+/**
  * 自定义业务异常
  */
 @Getter

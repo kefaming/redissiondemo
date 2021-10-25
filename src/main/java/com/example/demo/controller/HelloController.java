@@ -11,16 +11,14 @@ import java.util.HashMap;
 
 @Slf4j
 @Controller
-public class UserController {
+public class HelloController {
 
     @Autowired
     private SerialService serialService;
 
     @RequestMapping("/hello")
     public String hello(HashMap<String, Object> map) {
-
         Serial serial = serialService.getSerialInfo("SEQ_USER_ID");
-
         return "hello";
     }
 

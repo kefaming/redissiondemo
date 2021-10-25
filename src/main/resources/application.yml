@@ -3,6 +3,9 @@ server:
   servlet:
     context-path: / #设置应用的目录.  前缀需要带/, 无需设置后缀, 示例 【 /xxx 】 or 【 / 】
 spring:
+  thymeleaf:
+    suffix: .html
+    prefix=classpath: /templates/
   datasource:
     url: jdbc:mysql://127.0.0.1:3307/admin
     username: root

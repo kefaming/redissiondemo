@@ -11,9 +11,9 @@ spring:
     username: root
     password: 1234
     driver-class-name: com.mysql.jdbc.Driver
-mybatis-plus:
-  mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.example.demo.mapper # 在mapper文件中实体类前不用写包名
+#mybatis-plus:
+#  mapper-locations: classpath:mapper/*.xml
+#  type-aliases-package: com.example.demo.mapper # 在mapper文件中实体类前不用写包名
 
 
 
